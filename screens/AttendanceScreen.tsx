@@ -1,30 +1,23 @@
-import React from 'react';
-import { StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { StyleSheet, FlatList } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
-import { HouseHelpItem } from '@/components/HouseHelpItem';
+import { AttendanceMarker } from '@/components/AttendanceMarker';
 import { useHouseHelp } from '@/contexts/HouseHelpContext';
 import { theme } from '@/styles/theme';
 
-const HomeScreen: React.FC = () => {
+const AttendanceScreen: React.FC = () => {
   const { houseHelps } = useHouseHelp();
-  const router = useRouter();
-
-  const handleAddHouseHelp = () => {
-    router.push('/add-house-help');
-  };
+  const [currentDate] = useState(new Date().toISOString().split('T')[0]);
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>HouseHelp Manager</ThemedText>
-      <TouchableOpacity style={styles.addButton} onPress={handleAddHouseHelp}>
-        <ThemedText style={styles.addButtonText}>Add House Help</ThemedText>
-      </TouchableOpacity>
+      <ThemedText type="title" style={styles.title}>Mark Attendance</ThemedText>
+      <ThemedText type="subtitle" style={styles.date}>{currentDate}</ThemedText>
       <FlatList
         data={houseHelps}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <HouseHelpItem houseHelp={item} />}
+        renderItem={({ item }) => <AttendanceMarker houseHelp={item} date={currentDate} />}
         ListEmptyComponent={
           <ThemedView style={styles.emptyContainer}>
             <ThemedText style={styles.emptyText}>No house helps added yet.</ThemedText>
@@ -42,19 +35,12 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
   },
   title: {
-    marginBottom: 16,
+    marginBottom: 8,
     color: theme.colors.text,
   },
-  addButton: {
-    backgroundColor: theme.colors.accent,
-    padding: 12,
-    borderRadius: 4,
-    alignItems: 'center',
+  date: {
     marginBottom: 16,
-  },
-  addButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: theme.colors.text,
   },
   emptyContainer: {
     padding: 16,
@@ -68,4 +54,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+export default AttendanceScreen;

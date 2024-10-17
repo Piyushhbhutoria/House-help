@@ -13,7 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.piyushhb.house-help"
     },
     "android": {
       "adaptiveIcon": {
@@ -31,6 +32,11 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2d2d2595-c8bd-438f-8bbf-1889c5555e1b"
+      }
     }
   }
 }
