@@ -1,50 +1,93 @@
-# Welcome to your Expo app 👋
+# HouseHelp Manager
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+HouseHelp Manager is a React Native application designed to help users manage and track the attendance and salary of house helps. The app provides features to add, edit, and view house help details, mark attendance, and calculate salaries based on attendance records.
 
-## Get started
+## Features
 
-1. Install dependencies
+- **Add and Edit House Helps**: Easily add new house helps and edit existing ones with details like name, monthly salary, and number of shifts.
+- **Attendance Tracking**: Mark attendance for each house help on a daily basis, with options for full day, half day, or absent.
+- **Salary Calculation**: Automatically calculate salaries based on attendance records, considering full and half days.
+- **Calendar View**: View attendance records in a calendar format to easily track attendance over time.
+- **Theming**: The app adapts to the system's light or dark theme for a consistent user experience.
+
+## Tech Stack
+
+- **React Native**: For building the mobile application.
+- **Expo**: For development and testing.
+- **SQLite**: For local data storage.
+- **TypeScript**: For type-safe code.
+- Cursor Composer: For writing code. 
+
+## Installation
+
+1. **Clone the repository**:
+
+   ```bash
+   git clone https://github.com/Piyushhbhutoria/househelp-manager.git
+   cd househelp-manager
+   ```
+
+2. **Install dependencies**:
 
    ```bash
    npm install
    ```
 
-2. Start the app
+3. **Install Expo CLI** (if not already installed):
 
    ```bash
-    npx expo start
+   npm install -g expo-cli
    ```
 
-In the output, you'll find options to open the app in a
+4. **Start the Expo server**:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+   ```bash
+   npx expo start
+   ```
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+5. **Run on iOS Simulator**:
+   - Press `i` in the terminal to open the iOS simulator.
 
-## Get a fresh project
+6. **Run on Android Emulator**:
+   - Press `a` in the terminal to open the Android emulator.
 
-When you're ready, run:
+7. **Run on a physical device**:
+   - Install the Expo Go app from the App Store or Google Play.
+   - Scan the QR code displayed in the terminal or Expo Dev Tools.
 
-```bash
-npm run reset-project
-```
+## Building for iOS
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+1. **Ensure you have Xcode installed** on your Mac.
 
-## Learn more
+2. **Run the iOS build**:
 
-To learn more about developing your project with Expo, look at the following resources:
+   ```bash
+   npx expo run:ios
+   ```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+3. **Troubleshooting CocoaPods issues**:
+   - If you encounter issues with CocoaPods, try running:
 
-## Join the community
+     ```bash
+     cd ios
+     pod install
+     cd ..
+     ```
 
-Join our community of developers creating universal apps.
+## Building for Android
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+1. **Ensure you have Android Studio installed**.
+
+2. **Run the Android build**:
+
+   ```bash
+   npx expo run:android
+   ```
+
+## Contributing
+
+Contributions are welcome! Please fork the repository and submit a pull request for any improvements or bug fixes.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
