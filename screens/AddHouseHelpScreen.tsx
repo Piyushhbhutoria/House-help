@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useHouseHelp } from '@/contexts/HouseHelpContext';
-import { theme } from '@/styles/theme';
+import { useTheme } from '@react-navigation/native';
 
 const AddHouseHelpScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const router = useRouter();
   const { addHouseHelp } = useHouseHelp();
+  const theme = useTheme();
 
   const [name, setName] = useState('');
   const [monthlySalary, setMonthlySalary] = useState('');
@@ -23,7 +24,7 @@ const AddHouseHelpScreen: React.FC = () => {
     };
 
     addHouseHelp(houseHelpData);
-    navigation.goBack();
+    router.back();
   };
 
   return (
@@ -33,7 +34,7 @@ const AddHouseHelpScreen: React.FC = () => {
 
         <ThemedText type="subtitle">Name</ThemedText>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { borderColor: theme.colors.text, color: theme.colors.text }]}
           value={name}
           onChangeText={setName}
           placeholder="Enter name"
@@ -42,7 +43,7 @@ const AddHouseHelpScreen: React.FC = () => {
 
         <ThemedText type="subtitle">Monthly Salary</ThemedText>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { borderColor: theme.colors.text, color: theme.colors.text }]}
           value={monthlySalary}
           onChangeText={setMonthlySalary}
           placeholder="Enter monthly salary"
@@ -52,7 +53,7 @@ const AddHouseHelpScreen: React.FC = () => {
 
         <ThemedText type="subtitle">Number of Shifts</ThemedText>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { borderColor: theme.colors.text, color: theme.colors.text }]}
           value={shifts}
           onChangeText={setShifts}
           placeholder="Enter number of shifts"
@@ -60,7 +61,10 @@ const AddHouseHelpScreen: React.FC = () => {
           placeholderTextColor={theme.colors.text + '80'}
         />
 
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+        <TouchableOpacity 
+          style={[styles.saveButton, { backgroundColor: theme.colors.primary }]} 
+          onPress={handleSave}
+        >
           <ThemedText style={styles.saveButtonText}>Save</ThemedText>
         </TouchableOpacity>
       </ThemedView>
@@ -72,22 +76,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: theme.colors.primary,
   },
   title: {
     marginBottom: 16,
-    color: theme.colors.text,
   },
   input: {
     borderWidth: 1,
-    borderColor: theme.colors.text,
     borderRadius: 4,
     padding: 8,
     marginBottom: 16,
-    color: theme.colors.text,
   },
   saveButton: {
-    backgroundColor: theme.colors.accent,
     padding: 12,
     borderRadius: 4,
     alignItems: 'center',

@@ -6,13 +6,14 @@ import { ThemedText } from '@/components/ThemedText';
 import { AttendanceMarker } from '@/components/AttendanceMarker';
 import { useHouseHelp } from '@/contexts/HouseHelpContext';
 import { useAttendance } from '@/contexts/AttendanceContext';
-import { theme } from '@/styles/theme';
+import { useTheme } from '@react-navigation/native';
 
 const CalendarScreen: React.FC = () => {
   const { houseHelps } = useHouseHelp();
   const { attendances, getAttendanceForDate } = useAttendance();
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [markedDates, setMarkedDates] = useState({});
+  const theme = useTheme();
 
   useEffect(() => {
     const marked = attendances.reduce((acc, attendance) => {
@@ -22,7 +23,7 @@ const CalendarScreen: React.FC = () => {
       return acc;
     }, {});
     setMarkedDates(marked);
-  }, [attendances]);
+  }, [attendances, theme]);
 
   const onDayPress = (day: DateData) => {
     setSelectedDate(day.dateString);
@@ -37,15 +38,15 @@ const CalendarScreen: React.FC = () => {
           [selectedDate]: { selected: true, selectedColor: theme.colors.accent },
         }}
         theme={{
-          calendarBackground: theme.colors.primary,
+          calendarBackground: theme.colors.background,
           textSectionTitleColor: theme.colors.text,
           selectedDayBackgroundColor: theme.colors.accent,
-          selectedDayTextColor: '#ffffff',
+          selectedDayTextColor: theme.colors.background,
           todayTextColor: theme.colors.accent,
           dayTextColor: theme.colors.text,
-          textDisabledColor: `${theme.colors.text}50`,
+          textDisabledColor: theme.colors.text + '50',
           dotColor: theme.colors.accent,
-          selectedDotColor: '#ffffff',
+          selectedDotColor: theme.colors.background,
           arrowColor: theme.colors.accent,
           monthTextColor: theme.colors.text,
           indicatorColor: theme.colors.accent,
@@ -70,22 +71,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: theme.colors.primary,
   },
   dateTitle: {
     marginVertical: 16,
     textAlign: 'center',
-    color: theme.colors.text,
   },
   emptyContainer: {
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
-    backgroundColor: theme.colors.secondary,
   },
   emptyText: {
     textAlign: 'center',
-    color: theme.colors.accent,
   },
 });
 

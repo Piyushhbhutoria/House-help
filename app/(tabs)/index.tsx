@@ -5,11 +5,12 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { HouseHelpItem } from '@/components/HouseHelpItem';
 import { useHouseHelp } from '@/contexts/HouseHelpContext';
-import { theme } from '@/styles/theme';
+import { useTheme } from '@react-navigation/native';
 
 const HomeScreen: React.FC = () => {
   const { houseHelps } = useHouseHelp();
   const router = useRouter();
+  const theme = useTheme();
 
   const handleAddHouseHelp = () => {
     router.push('/add-house-help');
@@ -18,7 +19,7 @@ const HomeScreen: React.FC = () => {
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="title" style={styles.title}>HouseHelp Manager</ThemedText>
-      <TouchableOpacity style={styles.addButton} onPress={handleAddHouseHelp}>
+      <TouchableOpacity style={[styles.addButton, { backgroundColor: theme.colors.accent }]} onPress={handleAddHouseHelp}>
         <ThemedText style={styles.addButtonText}>Add House Help</ThemedText>
       </TouchableOpacity>
       <FlatList
@@ -39,14 +40,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: theme.colors.primary,
   },
   title: {
     marginBottom: 16,
-    color: theme.colors.text,
   },
   addButton: {
-    backgroundColor: theme.colors.accent,
     padding: 12,
     borderRadius: 4,
     alignItems: 'center',
@@ -60,11 +58,9 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
-    backgroundColor: theme.colors.secondary,
   },
   emptyText: {
     textAlign: 'center',
-    color: theme.colors.accent,
   },
 });
 

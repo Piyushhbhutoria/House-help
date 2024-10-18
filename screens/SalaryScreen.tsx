@@ -4,7 +4,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useHouseHelp } from '@/contexts/HouseHelpContext';
 import { useAttendance } from '@/contexts/AttendanceContext';
-import { theme } from '@/styles/theme';
+import { useTheme } from '@react-navigation/native';
 
 const SalaryScreen: React.FC = () => {
   const { houseHelps } = useHouseHelp();
@@ -12,6 +12,7 @@ const SalaryScreen: React.FC = () => {
   const [currentMonth, setCurrentMonth] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const theme = useTheme();
 
   useEffect(() => {
     const now = new Date();
@@ -27,7 +28,7 @@ const SalaryScreen: React.FC = () => {
     const salaryInfo = calculateSalary(houseHelp, startDate, endDate);
 
     return (
-      <ThemedView style={styles.salaryItem}>
+      <ThemedView style={styles.salaryItem} backgroundColor="secondary">
         <ThemedText type="subtitle">{houseHelp.name}</ThemedText>
         <ThemedText>Monthly Salary: ₹{houseHelp.monthlySalary}</ThemedText>
         <ThemedText>Total Days: {salaryInfo.totalDays}</ThemedText>
@@ -61,31 +62,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: theme.colors.primary,
   },
   title: {
     marginBottom: 8,
-    color: theme.colors.text,
   },
   subtitle: {
     marginBottom: 16,
-    color: theme.colors.text,
   },
   salaryItem: {
     padding: 16,
     borderRadius: 8,
     marginBottom: 8,
-    backgroundColor: theme.colors.secondary,
   },
   emptyContainer: {
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
-    backgroundColor: theme.colors.secondary,
   },
   emptyText: {
     textAlign: 'center',
-    color: theme.colors.accent,
   },
 });
 

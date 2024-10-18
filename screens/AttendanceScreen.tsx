@@ -4,11 +4,12 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { AttendanceMarker } from '@/components/AttendanceMarker';
 import { useHouseHelp } from '@/contexts/HouseHelpContext';
-import { theme } from '@/styles/theme';
+import { useTheme } from '@react-navigation/native';
 
 const AttendanceScreen: React.FC = () => {
   const { houseHelps } = useHouseHelp();
   const [currentDate] = useState(new Date().toISOString().split('T')[0]);
+  const theme = useTheme();
 
   return (
     <ThemedView style={styles.container}>
@@ -32,25 +33,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: theme.colors.primary,
   },
   title: {
     marginBottom: 8,
-    color: theme.colors.text,
   },
   date: {
     marginBottom: 16,
-    color: theme.colors.text,
   },
   emptyContainer: {
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
-    backgroundColor: theme.colors.secondary,
   },
   emptyText: {
     textAlign: 'center',
-    color: theme.colors.accent,
   },
 });
 
