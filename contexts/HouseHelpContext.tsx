@@ -7,6 +7,12 @@ export interface HouseHelp {
   monthlySalary: number;
   shifts: number;
   dailyWage: number;
+  overtimeRate: number;
+  holidayRate: number;
+  advancePayment: number;
+  adjustments: number;
+  multipleShifts: boolean;
+  shiftTimes?: { start: string; end: string }[];
 }
 
 interface HouseHelpContextType {

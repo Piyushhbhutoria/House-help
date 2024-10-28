@@ -1,12 +1,14 @@
 import { AttendanceProvider } from '@/contexts/AttendanceContext';
 import { HouseHelpProvider } from '@/contexts/HouseHelpContext';
+import { PaymentProvider } from '@/contexts/PaymentContext';
+import { SettingsProvider } from '@/contexts/SettingsContext';
+import { useTheme } from '@/hooks/useTheme';
 import { initDatabase } from '@/utils/database';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { SplashScreen, Stack } from 'expo-router';
 import { useEffect } from 'react';
-import { useTheme } from '@/hooks/useTheme';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -31,7 +33,6 @@ export default function RootLayout() {
     initDatabase().catch(error => console.error('Failed to initialize database:', error));
   }, []);
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -46,7 +47,6 @@ export default function RootLayout() {
     return null;
   }
 
-
   return <RootLayoutNav />;
 }
 
@@ -55,15 +55,23 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={theme}>
-      <HouseHelpProvider>
-        <AttendanceProvider>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="add-house-help" options={{ title: 'Add House Help' }} />
-            <Stack.Screen name="edit-house-help" options={{ title: 'Edit House Help' }} />
-          </Stack>
-        </AttendanceProvider>
-      </HouseHelpProvider>
+      <SettingsProvider>
+        <HouseHelpProvider>
+          <AttendanceProvider>
+            <PaymentProvider>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="add-house-help" />
+                <Stack.Screen name="edit-house-help" />
+                <Stack.Screen name="calendar" />
+                <Stack.Screen name="payments" />
+                <Stack.Screen name="payment-history" />
+                <Stack.Screen name="settings" />
+              </Stack>
+            </PaymentProvider>
+          </AttendanceProvider>
+        </HouseHelpProvider>
+      </SettingsProvider>
     </ThemeProvider>
   );
 }

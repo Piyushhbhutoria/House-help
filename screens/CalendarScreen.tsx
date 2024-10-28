@@ -3,6 +3,7 @@ import { StyleSheet, FlatList } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
+import { SafeAreaWrapper } from '@/components/SafeAreaWrapper';
 import { AttendanceMarker } from '@/components/AttendanceMarker';
 import { useHouseHelp } from '@/contexts/HouseHelpContext';
 import { useAttendance } from '@/contexts/AttendanceContext';
@@ -30,40 +31,42 @@ const CalendarScreen: React.FC = () => {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <Calendar
-        onDayPress={onDayPress}
-        markedDates={{
-          ...markedDates,
-          [selectedDate]: { selected: true, selectedColor: theme.colors.accent },
-        }}
-        theme={{
-          calendarBackground: theme.colors.background,
-          textSectionTitleColor: theme.colors.text,
-          selectedDayBackgroundColor: theme.colors.accent,
-          selectedDayTextColor: theme.colors.background,
-          todayTextColor: theme.colors.accent,
-          dayTextColor: theme.colors.text,
-          textDisabledColor: theme.colors.text + '50',
-          dotColor: theme.colors.accent,
-          selectedDotColor: theme.colors.background,
-          arrowColor: theme.colors.accent,
-          monthTextColor: theme.colors.text,
-          indicatorColor: theme.colors.accent,
-        }}
-      />
-      <ThemedText type="subtitle" style={styles.dateTitle}>{selectedDate}</ThemedText>
-      <FlatList
-        data={houseHelps}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <AttendanceMarker houseHelp={item} date={selectedDate} />}
-        ListEmptyComponent={
-          <ThemedView style={styles.emptyContainer}>
-            <ThemedText style={styles.emptyText}>No house helps added yet.</ThemedText>
-          </ThemedView>
-        }
-      />
-    </ThemedView>
+    <SafeAreaWrapper>
+      <ThemedView style={styles.container}>
+        <Calendar
+          onDayPress={onDayPress}
+          markedDates={{
+            ...markedDates,
+            [selectedDate]: { selected: true, selectedColor: theme.colors.accent },
+          }}
+          theme={{
+            calendarBackground: theme.colors.background,
+            textSectionTitleColor: theme.colors.text,
+            selectedDayBackgroundColor: theme.colors.accent,
+            selectedDayTextColor: theme.colors.background,
+            todayTextColor: theme.colors.accent,
+            dayTextColor: theme.colors.text,
+            textDisabledColor: theme.colors.text + '50',
+            dotColor: theme.colors.accent,
+            selectedDotColor: theme.colors.background,
+            arrowColor: theme.colors.accent,
+            monthTextColor: theme.colors.text,
+            indicatorColor: theme.colors.accent,
+          }}
+        />
+        <ThemedText type="subtitle" style={styles.dateTitle}>{selectedDate}</ThemedText>
+        <FlatList
+          data={houseHelps}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <AttendanceMarker houseHelp={item} date={selectedDate} />}
+          ListEmptyComponent={
+            <ThemedView style={styles.emptyContainer}>
+              <ThemedText style={styles.emptyText}>No house helps added yet.</ThemedText>
+            </ThemedView>
+          }
+        />
+      </ThemedView>
+    </SafeAreaWrapper>
   );
 };
 

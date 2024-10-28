@@ -1,8 +1,7 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { useTheme } from '@react-navigation/native';
+import { Tabs } from 'expo-router';
+import React from 'react';
 
 export default function TabLayout() {
   const theme = useTheme();
@@ -12,7 +11,17 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.text,
-        tabBarStyle: { backgroundColor: theme.colors.background },
+        tabBarStyle: {
+          backgroundColor: theme.colors.background,
+        },
+        headerShown: false,
+        tabBarLabelStyle: {
+          fontSize: 12,
+        },
+        tabBarIconStyle: {
+          marginBottom: -3,
+        },
+        tabBarAllowFontScaling: false,
       }}>
       <Tabs.Screen
         name="index"
@@ -29,17 +38,19 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="calendar"
-        options={{
-          title: 'Calendar',
-          tabBarIcon: ({ color }) => <TabBarIcon name="calendar-outline" color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="salary"
         options={{
           title: 'Salary',
           tabBarIcon: ({ color }) => <TabBarIcon name="cash-outline" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="more"
+        options={{
+          title: 'More',
+          tabBarIcon: ({ color }) => <TabBarIcon name="menu-outline" color={color} />,
+          tabBarLabel: 'More',
+          unmountOnBlur: true,
         }}
       />
     </Tabs>

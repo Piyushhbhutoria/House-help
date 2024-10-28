@@ -2,21 +2,64 @@
 
 HouseHelp Manager is a React Native application designed to help users manage and track the attendance and salary of house helps. The app provides features to add, edit, and view house help details, mark attendance, and calculate salaries based on attendance records.
 
+## Screenshots
+
+<div style="display: flex; flex-wrap: wrap; gap: 10px;">
+  <img src="screenshots/home-page.jpeg" width="200" alt="Home Screen">
+  <!-- <img src="screenshots/attendance-page.jpeg" width="200" alt="Attendance Screen"> -->
+  <!-- <img src="screenshots/calendar-page.jpeg" width="200" alt="Calendar Screen"> -->
+  <img src="screenshots/salary-page.jpeg" width="200" alt="Salary Screen">
+  <!-- <img src="screenshots/payments-page.jpeg" width="200" alt="Payments Screen"> -->
+  <!-- <img src="screenshots/history-page.jpeg" width="200" alt="Payment History Screen"> -->
+  <!-- <img src="screenshots/settings-page.jpeg" width="200" alt="Settings Screen"> -->
+</div>
+
 ## Features
 
-- **Add and Edit House Helps**: Easily add new house helps and edit existing ones with details like name, monthly salary, and number of shifts.
-- **Attendance Tracking**: Mark attendance for each house help on a daily basis, with options for full day, half day, or absent.
-- **Salary Calculation**: Automatically calculate salaries based on attendance records, considering full and half days.
-- **Calendar View**: View attendance records in a calendar format to easily track attendance over time.
-- **Theming**: The app adapts to the system's light or dark theme for a consistent user experience.
+### Core Features
+
+- **Multiple House Help Management**: Track up to 5 house helps simultaneously
+- **Attendance Tracking**:
+  - Mark daily attendance (Present/Absent/Half-day)
+  - Configure multiple shifts per house help
+  - Calendar view for attendance history
+- **Salary Management**:
+  - Automatic salary calculation based on attendance
+  - Support for advance payments and adjustments
+  - Holiday pay and overtime calculations
+  - Monthly salary summaries
+
+### Payment Features
+
+- **Advanced Payment Handling**:
+  - Record advance payments
+  - Track holiday pay
+  - Manage overtime payments
+  - Handle salary adjustments
+- **Payment History**:
+  - Detailed transaction history
+  - Filter by payment type
+  - Monthly payment summaries
+
+### UI/UX Features
+
+- **Modern Interface**:
+  - Clean, intuitive navigation
+  - Safe area support for notched devices
+  - Responsive design for all screen sizes
+- **Theme Support**:
+  - Automatic light/dark theme switching
+  - System theme integration
+  - Consistent styling throughout the app
 
 ## Tech Stack
 
-- **React Native**: For building the mobile application.
-- **Expo**: For development and testing.
-- **SQLite**: For local data storage.
-- **TypeScript**: For type-safe code.
-- Cursor Composer: For writing code. 
+- **React Native**: For building the mobile application
+- **Expo**: For development and testing
+- **SQLite**: For local data storage
+- **TypeScript**: For type-safe code
+- **React Navigation**: For app navigation
+- **Expo SQLite**: For local database management
 
 ## Installation
 
@@ -45,44 +88,43 @@ HouseHelp Manager is a React Native application designed to help users manage an
    npx expo start
    ```
 
-5. **Run on iOS Simulator**:
-   - Press `i` in the terminal to open the iOS simulator.
+## Development
 
-6. **Run on Android Emulator**:
-   - Press `a` in the terminal to open the Android emulator.
+### Project Structure
 
-7. **Run on a physical device**:
-   - Install the Expo Go app from the App Store or Google Play.
-   - Scan the QR code displayed in the terminal or Expo Dev Tools.
+```
+househelp-manager/
+├── app/                    # App screens and navigation
+│   ├── (tabs)/            # Tab-based screens
+│   └── _layout.tsx        # Root layout configuration
+├── components/            # Reusable components
+│   ├── navigation/        # Navigation components
+│   └── themed/           # Themed components
+├── contexts/             # React contexts
+├── hooks/                # Custom hooks
+└── utils/               # Utility functions
+```
 
-## Building for iOS
+### Key Components
 
-1. **Ensure you have Xcode installed** on your Mac.
+- **Navigation**: Tab-based navigation with More menu for additional features
+- **Database**: Local SQLite database for data persistence
+- **Contexts**: Global state management for house helps, attendance, and payments
+- **Theming**: Dynamic theme support with light and dark modes
 
-2. **Run the iOS build**:
+## Building and Deployment
 
-   ```bash
-   npx expo run:ios
-   ```
+### iOS Build
 
-3. **Troubleshooting CocoaPods issues**:
-   - If you encounter issues with CocoaPods, try running:
+```bash
+npx expo run:ios
+```
 
-     ```bash
-     cd ios
-     pod install
-     cd ..
-     ```
+### Android Build
 
-## Building for Android
-
-1. **Ensure you have Android Studio installed**.
-
-2. **Run the Android build**:
-
-   ```bash
-   npx expo run:android
-   ```
+```bash
+npx expo run:android
+```
 
 ## Contributing
 
@@ -90,4 +132,4 @@ Contributions are welcome! Please fork the repository and submit a pull request 
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License. See the [LICENSE](LICENSE) file for details.
