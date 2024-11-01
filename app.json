@@ -14,12 +14,16 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.piyushhb.house-help"
+      "bundleIdentifier": "com.piyushhb.house-help",
+      "runtimeVersion": "1.0.0"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "runtimeVersion": {
+        "policy": "appVersion"
       }
     },
     "web": {
@@ -37,6 +41,9 @@
       "eas": {
         "projectId": "2d2d2595-c8bd-438f-8bbf-1889c5555e1b"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/2d2d2595-c8bd-438f-8bbf-1889c5555e1b"
     }
   }
 }
