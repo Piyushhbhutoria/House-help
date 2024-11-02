@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, FlatList, View } from 'react-native';
+import { StyleSheet, FlatList, TouchableOpacity, View } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { SafeAreaWrapper } from '@/components/SafeAreaWrapper';
-import { useHouseHelp, HouseHelp } from '@/contexts/HouseHelpContext';
+import { useHouseHelp } from '@/contexts/HouseHelpContext';
 import { useAttendance } from '@/contexts/AttendanceContext';
 import { usePayment } from '@/contexts/PaymentContext';
 import { useTheme } from '@react-navigation/native';
-
+import { Ionicons } from '@expo/vector-icons';
 interface SalaryInfo {
   totalSalary: number;
 }
-
 interface TotalSalaryInfo {
   baseSalary: number;
   holidayPay: number;
@@ -25,22 +24,47 @@ const SalaryScreen: React.FC = () => {
   const { houseHelps } = useHouseHelp();
   const { calculateSalary } = useAttendance();
   const { getPaymentsForHouseHelp } = usePayment();
-
-  const [currentMonth, setCurrentMonth] = useState('');
+  const theme = useTheme();
+  
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
-  useEffect(() => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth() + 1;
+  const updateDates = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
     const monthString = month.toString().padStart(2, '0');
-    setCurrentMonth(`${year}-${monthString}`);
+    const lastDay = new Date(year, month, 0).getDate();
+    
     setStartDate(`${year}-${monthString}-01`);
-    setEndDate(`${year}-${monthString}-${new Date(year, month, 0).getDate()}`);
-  }, []);
+    setEndDate(`${year}-${monthString}-${lastDay}`);
+  };
 
-  const calculateTotalSalary = (houseHelp: HouseHelp, salaryInfo: SalaryInfo): TotalSalaryInfo => {
+  useEffect(() => {
+    updateDates(selectedDate);
+  }, [selectedDate]);
+
+  const goToPreviousMonth = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setMonth(newDate.getMonth() - 1);
+    setSelectedDate(newDate);
+  };
+
+  const goToNextMonth = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setMonth(newDate.getMonth() + 1);
+    const currentDate = new Date();
+    if (newDate <= currentDate) {
+      setSelectedDate(newDate);
+    }
+  };
+
+  const formatMonthYear = (date: Date) => {
+    return date.toLocaleString('default', { month: 'long', year: 'numeric' });
+  };
+
+  const calculateTotalSalary = (houseHelp: HouseHelp, salaryInfo: SalaryInfo):
+    TotalSalaryInfo => {
     const payments = getPaymentsForHouseHelp(houseHelp.id, startDate, endDate);
     
     const baseSalary = salaryInfo.totalSalary;
@@ -92,7 +116,31 @@ const SalaryScreen: React.FC = () => {
     <SafeAreaWrapper>
       <ThemedView style={styles.container}>
         <ThemedText type="title" style={styles.title}>Salary Information</ThemedText>
-        <ThemedText type="subtitle" style={styles.subtitle}>{currentMonth}</ThemedText>
+        
+        <View style={styles.monthSelector}>
+          <TouchableOpacity onPress={goToPreviousMonth}>
+            <Ionicons name="chevron-back" size={24} color={theme.colors.text} />
+          </TouchableOpacity>
+          
+          <ThemedText type="subtitle" style={styles.monthText}>
+            {formatMonthYear(selectedDate)}
+          </ThemedText>
+          
+          <TouchableOpacity 
+            onPress={goToNextMonth}
+            disabled={selectedDate.getMonth() === new Date().getMonth()}
+          >
+            <Ionicons 
+              name="chevron-forward" 
+              size={24} 
+              color={selectedDate.getMonth() === new Date().getMonth() 
+                ? theme.colors.text + '50' 
+                : theme.colors.text
+              } 
+            />
+          </TouchableOpacity>
+        </View>
+
         <FlatList
           data={houseHelps}
           keyExtractor={(item) => item.id}
@@ -116,8 +164,15 @@ const styles = StyleSheet.create({
   title: {
     marginBottom: 8,
   },
-  subtitle: {
+  monthSelector: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 16,
     marginBottom: 16,
+  },
+  monthText: {
+    textAlign: 'center',
   },
   salaryItem: {
     padding: 16,
