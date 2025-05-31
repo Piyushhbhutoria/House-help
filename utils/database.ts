@@ -1,37 +1,58 @@
 import { Attendance } from '@/contexts/AttendanceContext';
 import { HouseHelp } from '@/contexts/HouseHelpContext';
 import * as SQLite from 'expo-sqlite';
+import { Platform } from 'react-native';
 
-let db: SQLite.SQLiteDatabase | null = null;
+let db: SQLite.SQLiteDatabase | MockDatabase | null = null;
+
+// Mock database implementation for web platform
+class MockDatabase {
+  async execAsync(query: string): Promise<any[]> {
+    console.warn('Database operations are not supported on web platform');
+    return [{ rows: [] }];
+  }
+
+  async prepareAsync(query: string) {
+    console.warn('Database operations are not supported on web platform');
+    return {
+      executeAsync: async () => [],
+    };
+  }
+}
 
 export const initDatabase = async (): Promise<void> => {
   if (db === null) {
-    db = await SQLite.openDatabaseAsync('househelp.db');
-    console.log('Database initialized successfully');
+    if (Platform.OS === 'web') {
+      db = new MockDatabase();
+      console.log('Mock database initialized for web platform');
+    } else {
+      db = await SQLite.openDatabaseAsync('househelp.db');
+      console.log('Database initialized successfully');
+
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS househelps (
+          id TEXT PRIMARY KEY NOT NULL,
+          name TEXT NOT NULL,
+          monthlySalary REAL NOT NULL,
+          shifts INTEGER NOT NULL,
+          dailyWage REAL NOT NULL
+        );
+      `);
+
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS attendances (
+          id TEXT PRIMARY KEY NOT NULL,
+          houseHelpId TEXT NOT NULL,
+          date TEXT NOT NULL,
+          status TEXT NOT NULL,
+          shiftsCompleted INTEGER NOT NULL,
+          FOREIGN KEY (houseHelpId) REFERENCES househelps (id)
+        );
+      `);
+
+      console.log('Tables created successfully');
+    }
   }
-
-  await db.execAsync(`
-    CREATE TABLE IF NOT EXISTS househelps (
-      id TEXT PRIMARY KEY NOT NULL,
-      name TEXT NOT NULL,
-      monthlySalary REAL NOT NULL,
-      shifts INTEGER NOT NULL,
-      dailyWage REAL NOT NULL
-    );
-  `);
-
-  await db.execAsync(`
-    CREATE TABLE IF NOT EXISTS attendances (
-      id TEXT PRIMARY KEY NOT NULL,
-      houseHelpId TEXT NOT NULL,
-      date TEXT NOT NULL,
-      status TEXT NOT NULL,
-      shiftsCompleted INTEGER NOT NULL,
-      FOREIGN KEY (houseHelpId) REFERENCES househelps (id)
-    );
-  `);
-
-  console.log('Tables created successfully');
 };
 
 export const getHouseHelps = async (): Promise<HouseHelp[]> => {
