@@ -1,6 +1,7 @@
 import { SafeAreaWrapper } from '@/components/SafeAreaWrapper';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { WorkingDaysSelector } from '@/components/WorkingDaysSelector';
 import { useHouseHelp } from '@/contexts/HouseHelpContext';
 import { useTheme } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -16,6 +17,7 @@ const HouseHelpFormScreen: React.FC = () => {
   const [name, setName] = useState('');
   const [monthlySalary, setMonthlySalary] = useState('');
   const [shifts, setShifts] = useState('');
+  const [workingDays, setWorkingDays] = useState<number[]>([1, 2, 3, 4, 5]); // Default: Monday to Friday
 
   useEffect(() => {
     if (houseHelpId) {
@@ -24,6 +26,7 @@ const HouseHelpFormScreen: React.FC = () => {
         setName(existingHouseHelp.name);
         setMonthlySalary(existingHouseHelp.monthlySalary.toString());
         setShifts(existingHouseHelp.shifts.toString());
+        setWorkingDays(existingHouseHelp.workingDays || [1, 2, 3, 4, 5]);
       }
     }
   }, [houseHelpId, houseHelps]);
@@ -34,6 +37,12 @@ const HouseHelpFormScreen: React.FC = () => {
       monthlySalary: parseFloat(monthlySalary),
       shifts: parseInt(shifts, 10),
       dailyWage: parseFloat(monthlySalary) / 30, // Assuming 30 days in a month
+      workingDays,
+      overtimeRate: 0,
+      holidayRate: 0,
+      advancePayment: 0,
+      adjustments: 0,
+      multipleShifts: false,
     };
 
     if (houseHelpId) {
@@ -80,6 +89,11 @@ const HouseHelpFormScreen: React.FC = () => {
             placeholder="Enter number of shifts"
             keyboardType="numeric"
             placeholderTextColor={theme.colors.text + '80'}
+          />
+
+          <WorkingDaysSelector
+            selectedDays={workingDays}
+            onDaysChange={setWorkingDays}
           />
 
           <TouchableOpacity style={[styles.saveButton, { backgroundColor: theme.colors.accent }]} onPress={handleSave}>

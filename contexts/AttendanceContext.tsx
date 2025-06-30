@@ -1,6 +1,6 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import { addAttendance as dbAddAttendance, updateAttendance as dbUpdateAttendance, getAttendances } from '@/utils/database';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { HouseHelp } from './HouseHelpContext';
-import { getAttendances, addAttendance as dbAddAttendance, updateAttendance as dbUpdateAttendance } from '@/utils/database';
 
 interface Attendance {
   id: string;
@@ -78,17 +78,36 @@ export const AttendanceProvider: React.FC<{ children: ReactNode }> = ({ children
       (a) => a.houseHelpId === houseHelp.id && a.date >= startDate && a.date <= endDate
     );
 
+    // Calculate total working days in the date range based on house help's working days
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    let totalWorkingDays = 0;
+
+    // If no working days specified (backward compatibility), count all days
+    const workingDays = houseHelp.workingDays && houseHelp.workingDays.length > 0
+      ? houseHelp.workingDays
+      : [0, 1, 2, 3, 4, 5, 6]; // All days if not specified
+
+    // Count actual working days in the date range
+    for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+      const dayOfWeek = date.getDay();
+      if (workingDays.includes(dayOfWeek)) {
+        totalWorkingDays++;
+      }
+    }
+
     const totalDays = relevantAttendances.length;
     const presentDays = relevantAttendances.filter((a) => a.status === 'present').length;
     const halfDays = relevantAttendances.filter((a) => a.status === 'half-day').length;
     const totalShifts = relevantAttendances.reduce((sum, a) => sum + a.shiftsCompleted, 0);
 
-    const dailyWage = houseHelp.monthlySalary / 30; // Assuming 30 days in a month
-    const totalSalary = (presentDays * dailyWage) + (halfDays * dailyWage * 0.5);
+    // Calculate salary based on shifts completed rather than just present/half days
+    const shiftWage = houseHelp.dailyWage / houseHelp.shifts; // Wage per shift
+    const totalSalary = totalShifts * shiftWage;
 
     return {
       houseHelpId: houseHelp.id,
-      totalDays,
+      totalDays: totalWorkingDays, // Use working days instead of attendance days
       presentDays,
       halfDays,
       totalShifts,

@@ -1,5 +1,5 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { getHouseHelps, addHouseHelp as dbAddHouseHelp, updateHouseHelp as dbUpdateHouseHelp, deleteHouseHelp as dbDeleteHouseHelp } from '@/utils/database';
+import { addHouseHelp as dbAddHouseHelp, deleteHouseHelp as dbDeleteHouseHelp, updateHouseHelp as dbUpdateHouseHelp, getHouseHelps } from '@/utils/database';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 export interface HouseHelp {
   id: string;
@@ -13,6 +13,7 @@ export interface HouseHelp {
   adjustments: number;
   multipleShifts: boolean;
   shiftTimes?: { start: string; end: string }[];
+  workingDays: number[]; // 0=Sunday, 1=Monday, ..., 6=Saturday
 }
 
 interface HouseHelpContextType {
@@ -44,8 +45,8 @@ export const HouseHelpProvider: React.FC<{ children: ReactNode }> = ({ children 
   };
 
   const addHouseHelp = async (houseHelp: Omit<HouseHelp, 'id'>) => {
-    const newHouseHelp: HouseHelp = { 
-      ...houseHelp, 
+    const newHouseHelp: HouseHelp = {
+      ...houseHelp,
       id: Date.now().toString() // Generate a unique ID
     };
     try {

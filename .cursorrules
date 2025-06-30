@@ -1,0 +1,126 @@
+# House Help App - Theme and Styling Rules
+
+## Theme System Overview
+
+This React Native app uses a comprehensive theme system with light and dark modes. Always ensure consistent theme usage across all components.
+
+### Theme Structure
+
+- **Primary Colors**: Light (#A1E4B6), Dark (#6DB28F) - Main brand color
+- **Secondary Colors**: Light (#F5F5F5), Dark (#2B303B) - Supporting backgrounds
+- **Accent Colors**: Light (#F76C5E), Dark (#E35B52) - Highlights and buttons
+- **Text Colors**: Light (#2E3D59), Dark (#D0F4D8) - Primary text
+- **Background Colors**: Light (#FCEED9), Dark (#1C2431) - Main backgrounds
+
+## Theme Usage Rules
+
+### 1. Always Use Theme Hooks
+
+- Use `useTheme()` from `@react-navigation/native` for accessing navigation theme
+- Use `useThemeColor()` from `@/hooks/useThemeColor` for Colors.ts color access
+- Use custom `useTheme()` from `@/hooks/useTheme` for app-specific theme colors
+
+### 2. Preferred Theme Components
+
+Always use themed components when available:
+
+- `ThemedText` instead of raw `Text` - automatically applies theme text color
+- `ThemedView` instead of raw `View` - automatically applies theme background color
+- Import from: `@/components/ThemedText` and `@/components/ThemedView`
+
+### 3. Color Usage Guidelines
+
+- **NEVER** hardcode colors like `#FFFFFF`, `black`, `red`, etc.
+- **ALWAYS** use theme colors: `theme.colors.primary`, `theme.colors.background`, etc.
+- For custom colors, define them in both light and dark variants
+- Use `backgroundColor` prop on ThemedView for different background variants
+
+### 4. Component Styling Pattern
+
+When creating new components, follow this pattern:
+
+```typescript
+import { useTheme } from '@react-navigation/native';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+
+export const MyComponent = () => {
+  const theme = useTheme();
+  
+  return (
+    <ThemedView style={[styles.container, { borderColor: theme.colors.border }]}>
+      <ThemedText type="title">Title</ThemedText>
+      <ThemedText>Body text</ThemedText>
+    </ThemedView>
+  );
+};
+```
+
+### 5. StyleSheet Guidelines
+
+- Define styles using StyleSheet.create()
+- Apply theme colors in component render, not in StyleSheet
+- Use theme colors for: backgroundColor, color, borderColor, shadowColor
+- Example:
+
+```typescript
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    borderRadius: 8,
+    // Don't put colors here - apply in component
+  },
+});
+```
+
+### 6. Text Typography
+
+ThemedText supports these types:
+
+- `title`: 24px, bold - for main headings
+- `subtitle`: 18px, 600 weight - for section headers  
+- `body`: 16px - for regular text (default)
+- `small`: 14px - for secondary text
+
+### 7. Theme-Aware Icons
+
+- Use theme colors for icon tinting
+- Access via `theme.colors.text` or `theme.colors.primary`
+- Consider icon visibility in both light and dark modes
+
+### 8. Background Hierarchies
+
+Use appropriate background colors:
+
+- `background`: Main screen background
+- `card`: Component/card backgrounds  
+- `secondary`: Alternative background areas
+
+### 9. Interactive Elements
+
+- Use `theme.colors.primary` for primary buttons/actions
+- Use `theme.colors.accent` for secondary actions/highlights
+- Ensure sufficient contrast in both themes
+
+### 10. Testing Theme Consistency
+
+- Test all components in both light and dark modes
+- Use device settings or color scheme toggle to verify
+- Ensure text remains readable and UI remains usable
+
+## Quick Reference
+
+- Theme hook: `const theme = useTheme();`
+- Colors: `theme.colors.primary`, `theme.colors.text`, etc.
+- Themed components: `<ThemedText>`, `<ThemedView>`
+- Color scheme detection: Handled automatically by hooks
+
+## Anti-Patterns to Avoid
+
+- ❌ Hardcoded colors: `backgroundColor: '#FFFFFF'`
+- ❌ Raw Text/View without theming: `<Text>` instead of `<ThemedText>`
+- ❌ Colors in StyleSheet: Define layout only, apply colors in render
+- ❌ Assuming light mode: Always consider dark mode appearance
+- ❌ Inconsistent color usage: Stick to defined theme colors
+
+Remember: Every UI element should respect the current theme and provide a consistent experience across light and dark modes.

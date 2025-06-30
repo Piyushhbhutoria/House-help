@@ -1,6 +1,7 @@
 import { SafeAreaWrapper } from '@/components/SafeAreaWrapper';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { WorkingDaysSelector } from '@/components/WorkingDaysSelector';
 import { useHouseHelp } from '@/contexts/HouseHelpContext';
 import { useTheme } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
@@ -15,6 +16,7 @@ const AddHouseHelpScreen: React.FC = () => {
   const [name, setName] = useState('');
   const [monthlySalary, setMonthlySalary] = useState('');
   const [shifts, setShifts] = useState('');
+  const [workingDays, setWorkingDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]); // Default: Monday to Friday
 
   const handleSave = () => {
     const houseHelpData = {
@@ -22,6 +24,7 @@ const AddHouseHelpScreen: React.FC = () => {
       monthlySalary: parseFloat(monthlySalary),
       shifts: parseInt(shifts, 10),
       dailyWage: parseFloat(monthlySalary) / 30, // Assuming 30 days in a month
+      workingDays,
       overtimeRate: 0, // Default value, adjust as needed
       holidayRate: 0, // Default value, adjust as needed
       advancePayment: 0, // Default value, adjust as needed
@@ -66,6 +69,11 @@ const AddHouseHelpScreen: React.FC = () => {
             placeholder="Enter number of shifts"
             keyboardType="numeric"
             placeholderTextColor={theme.colors.text + '80'}
+          />
+
+          <WorkingDaysSelector
+            selectedDays={workingDays}
+            onDaysChange={setWorkingDays}
           />
 
           <TouchableOpacity

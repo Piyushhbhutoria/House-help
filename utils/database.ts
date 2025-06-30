@@ -1,7 +1,15 @@
-import { Attendance } from '@/contexts/AttendanceContext';
 import { HouseHelp } from '@/contexts/HouseHelpContext';
 import * as SQLite from 'expo-sqlite';
 import { Platform } from 'react-native';
+
+// Define Attendance interface locally to avoid circular imports
+interface Attendance {
+  id: string;
+  houseHelpId: string;
+  date: string;
+  status: 'present' | 'absent' | 'half-day';
+  shiftsCompleted: number;
+}
 
 let db: SQLite.SQLiteDatabase | MockDatabase | null = null;
 
@@ -35,9 +43,43 @@ export const initDatabase = async (): Promise<void> => {
           name TEXT NOT NULL,
           monthlySalary REAL NOT NULL,
           shifts INTEGER NOT NULL,
-          dailyWage REAL NOT NULL
+          dailyWage REAL NOT NULL,
+          workingDays TEXT DEFAULT '1,2,3,4,5',
+          overtimeRate REAL DEFAULT 0,
+          holidayRate REAL DEFAULT 0,
+          advancePayment REAL DEFAULT 0,
+          adjustments REAL DEFAULT 0,
+          multipleShifts INTEGER DEFAULT 0
         );
       `);
+
+      // Check if workingDays column exists, if not add it for backward compatibility
+      try {
+        await db.execAsync(`ALTER TABLE househelps ADD COLUMN workingDays TEXT DEFAULT '1,2,3,4,5'`);
+        console.log('Added workingDays column for backward compatibility');
+      } catch (error) {
+        // Column already exists, ignore the error
+        console.log('workingDays column already exists');
+      }
+
+      // Add other missing columns for backward compatibility
+      const columnsToAdd = [
+        'overtimeRate REAL DEFAULT 0',
+        'holidayRate REAL DEFAULT 0',
+        'advancePayment REAL DEFAULT 0',
+        'adjustments REAL DEFAULT 0',
+        'multipleShifts INTEGER DEFAULT 0'
+      ];
+
+      for (const column of columnsToAdd) {
+        try {
+          await db.execAsync(`ALTER TABLE househelps ADD COLUMN ${column}`);
+          console.log(`Added ${column} column for backward compatibility`);
+        } catch (error) {
+          // Column already exists, ignore the error
+          console.log(`${column} column already exists or error adding it:`, error);
+        }
+      }
 
       await db.execAsync(`
         CREATE TABLE IF NOT EXISTS attendances (
@@ -62,8 +104,15 @@ export const getHouseHelps = async (): Promise<HouseHelp[]> => {
     console.log('Raw result from getHouseHelps:', JSON.stringify(result));
     if (result && Array.isArray(result) && result.length > 0) {
       if (result[0].rows && Array.isArray(result[0].rows)) {
-        console.log('Parsed house helps:', result[0].rows);
-        return result[0].rows as HouseHelp[];
+        // Parse workingDays from string to array
+        const houseHelps = result[0].rows.map((row: any) => ({
+          ...row,
+          workingDays: row.workingDays ? row.workingDays.split(',').map(Number) : [1, 2, 3, 4, 5],
+          multipleShifts: Boolean(row.multipleShifts),
+          shiftTimes: row.shiftTimes ? JSON.parse(row.shiftTimes) : undefined,
+        }));
+        console.log('Parsed house helps:', houseHelps);
+        return houseHelps as HouseHelp[];
       } else {
         console.warn('Unexpected rows structure:', result[0]);
         return [];
@@ -82,10 +131,25 @@ export const addHouseHelp = async (houseHelp: HouseHelp): Promise<void> => {
   if (!db) await initDatabase();
   try {
     console.log('Attempting to add house help:', houseHelp);
+    const workingDaysString = houseHelp.workingDays ? houseHelp.workingDays.join(',') : '1,2,3,4,5';
+    const shiftTimesString = houseHelp.shiftTimes ? JSON.stringify(houseHelp.shiftTimes) : null;
+
     const query = await db!.prepareAsync(
-      `INSERT INTO househelps (id, name, monthlySalary, shifts, dailyWage) VALUES (?, ?, ?, ?, ?)`
+      `INSERT INTO househelps (id, name, monthlySalary, shifts, dailyWage, workingDays, overtimeRate, holidayRate, advancePayment, adjustments, multipleShifts) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     );
-    await query.executeAsync([houseHelp.id, houseHelp.name, houseHelp.monthlySalary, houseHelp.shifts, houseHelp.dailyWage]);
+    await query.executeAsync([
+      houseHelp.id,
+      houseHelp.name,
+      houseHelp.monthlySalary,
+      houseHelp.shifts,
+      houseHelp.dailyWage,
+      workingDaysString,
+      houseHelp.overtimeRate || 0,
+      houseHelp.holidayRate || 0,
+      houseHelp.advancePayment || 0,
+      houseHelp.adjustments || 0,
+      houseHelp.multipleShifts ? 1 : 0
+    ]);
     console.log('House help added successfully');
   } catch (error) {
     console.error('Error adding house help:', error);
@@ -96,10 +160,24 @@ export const addHouseHelp = async (houseHelp: HouseHelp): Promise<void> => {
 export const updateHouseHelp = async (id: string, houseHelp: Partial<HouseHelp>): Promise<void> => {
   if (!db) await initDatabase();
   try {
+    const workingDaysString = houseHelp.workingDays ? houseHelp.workingDays.join(',') : '1,2,3,4,5';
+
     const query = await db!.prepareAsync(
-      `UPDATE househelps SET name = ?, monthlySalary = ?, shifts = ?, dailyWage = ? WHERE id = ?`
+      `UPDATE househelps SET name = ?, monthlySalary = ?, shifts = ?, dailyWage = ?, workingDays = ?, overtimeRate = ?, holidayRate = ?, advancePayment = ?, adjustments = ?, multipleShifts = ? WHERE id = ?`
     );
-    await query.executeAsync([houseHelp.name, houseHelp.monthlySalary, houseHelp.shifts, houseHelp.dailyWage, id]);
+    await query.executeAsync([
+      houseHelp.name || '',
+      houseHelp.monthlySalary || 0,
+      houseHelp.shifts || 1,
+      houseHelp.dailyWage || 0,
+      workingDaysString,
+      houseHelp.overtimeRate || 0,
+      houseHelp.holidayRate || 0,
+      houseHelp.advancePayment || 0,
+      houseHelp.adjustments || 0,
+      houseHelp.multipleShifts ? 1 : 0,
+      id
+    ]);
   } catch (error) {
     console.error('Error updating house help:', error);
     throw error;
@@ -152,7 +230,11 @@ export const updateAttendance = async (id: string, attendance: Partial<Attendanc
     const query = await db!.prepareAsync(
       `UPDATE attendances SET status = ?, shiftsCompleted = ? WHERE id = ?`
     );
-    await query.executeAsync([attendance.status, attendance.shiftsCompleted, id]);
+    await query.executeAsync([
+      attendance.status || 'absent',
+      attendance.shiftsCompleted || 0,
+      id
+    ]);
   } catch (error) {
     console.error('Error updating attendance:', error);
     throw error;
