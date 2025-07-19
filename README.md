@@ -436,6 +436,12 @@ For support and questions:
   <img src="screenshots/calendar-page.jpeg" width="200" alt="Calendar View">
   <img src="screenshots/salary-page.jpeg" width="200" alt="Salary Calculations">
   <img src="screenshots/add-help-page.jpeg" width="200" alt="Add Worker Form">
+  <img src="screenshots/analytics-page.jpeg" width="200" alt="Analytics Dashboard">
+  <!-- <img src="screenshots/insights-page.jpeg" width="200" alt="AI Insights"> -->
+  <img src="screenshots/add-payment-page.jpeg" width="200" alt="Payment Management">
+  <!-- <img src="screenshots/payment-history-page.jpeg" width="200" alt="Payment History"> -->
+  <!-- <img src="screenshots/edit-help-page.jpeg" width="200" alt="Edit Worker Form"> -->
+  <img src="screenshots/more-options.jpeg" width="200" alt="More Options">
 </div>
 
 ---
