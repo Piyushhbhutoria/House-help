@@ -6,11 +6,11 @@ HouseHelp Manager is a React Native application designed to help users manage an
 
 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
   <img src="screenshots/home-page.jpeg" width="200" alt="Home Screen">
-  <!-- <img src="screenshots/attendance-page.jpeg" width="200" alt="Attendance Screen"> -->
-  <!-- <img src="screenshots/calendar-page.jpeg" width="200" alt="Calendar Screen"> -->
+  <img src="screenshots/attendance-page.jpeg" width="200" alt="Attendance Screen">
+  <img src="screenshots/calendar-page.jpeg" width="200" alt="Calendar Screen">
   <img src="screenshots/salary-page.jpeg" width="200" alt="Salary Screen">
   <!-- <img src="screenshots/payments-page.jpeg" width="200" alt="Payments Screen"> -->
-  <!-- <img src="screenshots/history-page.jpeg" width="200" alt="Payment History Screen"> -->
+  <img src="screenshots/add-help-page.jpeg" width="200" alt="Payment History Screen">
   <!-- <img src="screenshots/settings-page.jpeg" width="200" alt="Settings Screen"> -->
 </div>
 
