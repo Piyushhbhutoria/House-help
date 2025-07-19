@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.loopback-labs.house-help",
+      "bundleIdentifier": "com.loopbacklabs.househelp",
       "runtimeVersion": "1.0.0"
     },
     "android": {
@@ -23,7 +23,7 @@
         "backgroundColor": "#ffffff"
       },
       "runtimeVersion": "1.0.0",
-      "package": "xyz.loopback-labs.house-help",
+      "package": "com.loopbacklabs.househelp",
       "versionCode": 1,
       "permissions": [
         "CAMERA",
