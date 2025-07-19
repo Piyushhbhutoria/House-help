@@ -1,8 +1,10 @@
 import { useAttendance } from '@/contexts/AttendanceContext';
 import { HouseHelp } from '@/contexts/HouseHelpContext';
 import { useTheme } from '@/hooks/useTheme';
+import { borderRadius, shadows, spacing, typography } from '@/utils/spacing';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
+import { Button, Divider, Icon } from 'react-native-elements';
 import { ThemedText } from './ThemedText';
 import { ThemedView } from './ThemedView';
 
@@ -57,54 +59,6 @@ export const AttendanceMarker: React.FC<AttendanceMarkerProps> = ({ houseHelp, d
     setCurrentShifts(shiftsCompleted);
   };
 
-  const generateShiftButtons = () => {
-    const buttons = [];
-
-    // Absent button (0 shifts)
-    buttons.push(
-      <TouchableOpacity
-        key={0}
-        style={[
-          styles.button,
-          currentShifts === 0 && styles.activeButton,
-          {
-            backgroundColor: currentShifts === 0 ? theme.colors.accent : theme.colors.primary,
-            borderColor: currentShifts === 0 ? theme.colors.accent : 'transparent'
-          }
-        ]}
-        onPress={() => markAttendance(0)}
-      >
-        <ThemedText style={[styles.buttonText, { color: theme.colors.background }]}>
-          Absent
-        </ThemedText>
-      </TouchableOpacity>
-    );
-
-    // Shift count buttons (1 to max shifts)
-    for (let i = 1; i <= houseHelp.shifts; i++) {
-      buttons.push(
-        <TouchableOpacity
-          key={i}
-          style={[
-            styles.button,
-            currentShifts === i && styles.activeButton,
-            {
-              backgroundColor: currentShifts === i ? theme.colors.accent : theme.colors.primary,
-              borderColor: currentShifts === i ? theme.colors.accent : 'transparent'
-            }
-          ]}
-          onPress={() => markAttendance(i)}
-        >
-          <ThemedText style={[styles.buttonText, { color: theme.colors.background }]}>
-            {i} {i === 1 ? 'Shift' : 'Shifts'}
-          </ThemedText>
-        </TouchableOpacity>
-      );
-    }
-
-    return buttons;
-  };
-
   const getWorkingDaysText = () => {
     if (!houseHelp.workingDays || houseHelp.workingDays.length === 0) {
       return 'Works every day';
@@ -115,31 +69,138 @@ export const AttendanceMarker: React.FC<AttendanceMarkerProps> = ({ houseHelp, d
     return `Works on: ${houseHelp.workingDays.map(day => DAYS_OF_WEEK[day]).join(', ')}`;
   };
 
+  const getStatusColor = () => {
+    if (currentShifts === 0) return theme.colors.accent;
+    if (currentShifts === houseHelp.shifts) return theme.colors.accent;
+    return theme.colors.accent;
+  };
+
+  const getStatusText = () => {
+    if (currentShifts === 0) return 'Absent';
+    if (currentShifts === houseHelp.shifts) return 'Present';
+    return 'Partial';
+  };
+
   return (
-    <ThemedView style={[styles.container, { backgroundColor: theme.colors.card }]}>
-      <ThemedText type="subtitle" style={{ color: theme.colors.text }}>
-        {houseHelp.name}
-      </ThemedText>
-      <ThemedText style={[styles.shiftInfo, { color: theme.colors.text }]}>
-        Max shifts per day: {houseHelp.shifts}
-      </ThemedText>
-      <ThemedText style={[styles.workingDaysInfo, { color: theme.colors.text }]}>
-        {getWorkingDaysText()}
-      </ThemedText>
+    <ThemedView style={[styles.container]}>
+      {/* Header with name and status */}
+      <ThemedView style={styles.header}>
+        <ThemedView style={styles.nameSection}>
+          <ThemedView style={[styles.avatarContainer, { backgroundColor: theme.colors.primary + '20' }]}>
+            <Icon
+              name="person"
+              type="ionicon"
+              size={18}
+              color={theme.colors.primary}
+            />
+          </ThemedView>
+          <ThemedView style={styles.nameContainer}>
+            <ThemedText style={[styles.name, { color: theme.colors.text }]}>
+              {houseHelp.name}
+            </ThemedText>
+            <ThemedText style={[styles.workingDays, { color: theme.colors.text + '70' }]}>
+              {getWorkingDaysText()}
+            </ThemedText>
+          </ThemedView>
+        </ThemedView>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.buttonScrollContainer}
-        contentContainerStyle={styles.buttonContainer}
-      >
-        {generateShiftButtons()}
-      </ScrollView>
+        {currentShifts > 0 && (
+          <ThemedView style={[styles.statusBadge, { backgroundColor: getStatusColor() + '20' }]}>
+            <ThemedText style={[styles.statusText, { color: getStatusColor() }]}>
+              {getStatusText()}
+            </ThemedText>
+          </ThemedView>
+        )}
+      </ThemedView>
 
-      {currentShifts > 0 && (
-        <ThemedText style={[styles.statusText, { color: theme.colors.accent }]}>
-          {currentShifts} of {houseHelp.shifts} shifts completed
+      <Divider style={{ marginVertical: spacing.md }} />
+
+      {/* Shifts information */}
+      <ThemedView style={styles.shiftsInfo}>
+        <Icon
+          name="time-outline"
+          type="ionicon"
+          size={16}
+          color={theme.colors.text + '60'}
+        />
+        <ThemedText style={[styles.shiftsText, { color: theme.colors.text }]}>
+          Maximum {houseHelp.shifts} shifts per day
         </ThemedText>
+      </ThemedView>
+
+      {/* Attendance buttons */}
+      <ThemedView style={styles.buttonSection}>
+        <ThemedText style={[styles.buttonSectionTitle, { color: theme.colors.text }]}>
+          Mark Attendance
+        </ThemedText>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.buttonScrollContainer}
+          contentContainerStyle={styles.buttonContainer}
+        >
+          {/* Absent button */}
+          <Button
+            title="Absent"
+            onPress={() => markAttendance(0)}
+            buttonStyle={[
+              styles.attendanceButton,
+              currentShifts === 0 && styles.activeButton,
+              {
+                backgroundColor: currentShifts === 0 ? theme.colors.accent : theme.colors.primary + '20',
+                borderColor: currentShifts === 0 ? theme.colors.accent : theme.colors.primary,
+              }
+            ]}
+            titleStyle={[
+              styles.buttonText,
+              { color: currentShifts === 0 ? '#FFFFFF' : theme.colors.primary }
+            ]}
+            containerStyle={styles.buttonWrapper}
+          />
+
+          {/* Shift buttons */}
+          {Array.from({ length: houseHelp.shifts }, (_, i) => i + 1).map((shiftCount) => (
+            <Button
+              key={shiftCount}
+              title={`${shiftCount} ${shiftCount === 1 ? 'Shift' : 'Shifts'}`}
+              onPress={() => markAttendance(shiftCount)}
+              buttonStyle={[
+                styles.attendanceButton,
+                currentShifts === shiftCount && styles.activeButton,
+                {
+                  backgroundColor: currentShifts === shiftCount ? theme.colors.accent : theme.colors.primary + '20',
+                  borderColor: currentShifts === shiftCount ? theme.colors.accent : theme.colors.primary,
+                }
+              ]}
+              titleStyle={[
+                styles.buttonText,
+                { color: currentShifts === shiftCount ? '#FFFFFF' : theme.colors.primary }
+              ]}
+              containerStyle={styles.buttonWrapper}
+            />
+          ))}
+        </ScrollView>
+      </ThemedView>
+
+      {/* Progress indicator */}
+      {currentShifts > 0 && (
+        <ThemedView style={styles.progressSection}>
+          <ThemedView style={styles.progressBar}>
+            <ThemedView
+              style={[
+                styles.progressFill,
+                {
+                  width: `${(currentShifts / houseHelp.shifts) * 100}%`,
+                  backgroundColor: getStatusColor()
+                }
+              ]}
+            />
+          </ThemedView>
+          <ThemedText style={[styles.progressText, { color: theme.colors.text }]}>
+            {currentShifts} of {houseHelp.shifts} shifts completed
+          </ThemedText>
+        </ThemedView>
       )}
     </ThemedView>
   );
@@ -147,59 +208,108 @@ export const AttendanceMarker: React.FC<AttendanceMarkerProps> = ({ houseHelp, d
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: 'transparent',
+    padding: spacing.lg,
+    borderRadius: borderRadius.lg,
+    ...shadows.sm,
   },
-  shiftInfo: {
-    fontSize: 12,
-    marginTop: 4,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  nameSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  avatarContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: spacing.md,
+  },
+  nameContainer: {
+    flex: 1,
+  },
+  name: {
+    ...typography.headline,
+    fontWeight: '600',
+    marginBottom: spacing.xs,
+  },
+  workingDays: {
+    ...typography.caption1,
+  },
+  statusBadge: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
+  },
+  statusText: {
+    ...typography.caption1,
+    fontWeight: '600',
+  },
+  shiftsInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  shiftsText: {
+    ...typography.caption1,
+    marginLeft: spacing.sm,
     opacity: 0.7,
   },
-  workingDaysInfo: {
-    fontSize: 11,
-    marginTop: 2,
-    opacity: 0.6,
+  buttonSection: {
+    marginTop: spacing.md,
+  },
+  buttonSectionTitle: {
+    ...typography.subhead,
+    fontWeight: '600',
+    marginBottom: spacing.sm,
   },
   buttonScrollContainer: {
-    marginTop: 12,
+    marginTop: spacing.xs,
   },
   buttonContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: spacing.xs,
   },
-  button: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-    marginHorizontal: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 70,
+  buttonWrapper: {
+    marginHorizontal: spacing.xs,
+  },
+  attendanceButton: {
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderWidth: 1,
+    minWidth: 80,
   },
   activeButton: {
-    borderWidth: 2,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.22,
-    shadowRadius: 2.22,
+    ...shadows.sm,
   },
   buttonText: {
-    fontSize: 12,
+    ...typography.caption1,
     fontWeight: '600',
-    textAlign: 'center',
   },
-  statusText: {
-    fontSize: 12,
-    marginTop: 8,
-    textAlign: 'center',
+  progressSection: {
+    marginTop: spacing.lg,
+    alignItems: 'center',
+  },
+  progressBar: {
+    width: '100%',
+    height: 6,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    borderRadius: 3,
+    marginBottom: spacing.sm,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  progressText: {
+    ...typography.caption1,
     fontWeight: '500',
   },
 });

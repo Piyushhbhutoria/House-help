@@ -18,15 +18,18 @@ export interface HouseHelp {
 
 interface HouseHelpContextType {
   houseHelps: HouseHelp[];
-  addHouseHelp: (houseHelp: Omit<HouseHelp, 'id'>) => void;
-  updateHouseHelp: (id: string, houseHelp: Partial<HouseHelp>) => void;
-  deleteHouseHelp: (id: string) => void;
+  loading: boolean;
+  addHouseHelp: (houseHelp: Omit<HouseHelp, 'id'>) => Promise<void>;
+  updateHouseHelp: (id: string, updatedHouseHelp: Partial<HouseHelp>) => Promise<void>;
+  deleteHouseHelp: (id: string) => Promise<void>;
+  refreshHouseHelps: () => Promise<void>;
 }
 
 const HouseHelpContext = createContext<HouseHelpContextType | undefined>(undefined);
 
 export const HouseHelpProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [houseHelps, setHouseHelps] = useState<HouseHelp[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadHouseHelps();
@@ -34,6 +37,7 @@ export const HouseHelpProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const loadHouseHelps = async () => {
     try {
+      setLoading(true);
       console.log('Loading house helps...');
       const loadedHouseHelps = await getHouseHelps();
       console.log('Loaded house helps:', loadedHouseHelps);
@@ -41,6 +45,8 @@ export const HouseHelpProvider: React.FC<{ children: ReactNode }> = ({ children 
     } catch (error) {
       console.error('Failed to load house helps:', error);
       setHouseHelps([]); // Set to empty array in case of error
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,6 +60,7 @@ export const HouseHelpProvider: React.FC<{ children: ReactNode }> = ({ children 
       setHouseHelps((prevHouseHelps) => [...prevHouseHelps, newHouseHelp]);
     } catch (error) {
       console.error('Failed to add house help:', error);
+      throw error;
     }
   };
 
@@ -67,6 +74,7 @@ export const HouseHelpProvider: React.FC<{ children: ReactNode }> = ({ children 
       );
     } catch (error) {
       console.error('Failed to update house help:', error);
+      throw error;
     }
   };
 
@@ -76,11 +84,23 @@ export const HouseHelpProvider: React.FC<{ children: ReactNode }> = ({ children 
       setHouseHelps((prevHouseHelps) => prevHouseHelps.filter((houseHelp) => houseHelp.id !== id));
     } catch (error) {
       console.error('Failed to delete house help:', error);
+      throw error;
     }
   };
 
+  const refreshHouseHelps = async () => {
+    await loadHouseHelps();
+  };
+
   return (
-    <HouseHelpContext.Provider value={{ houseHelps, addHouseHelp, updateHouseHelp, deleteHouseHelp }}>
+    <HouseHelpContext.Provider value={{
+      houseHelps,
+      loading,
+      addHouseHelp,
+      updateHouseHelp,
+      deleteHouseHelp,
+      refreshHouseHelps
+    }}>
       {children}
     </HouseHelpContext.Provider>
   );
@@ -88,7 +108,7 @@ export const HouseHelpProvider: React.FC<{ children: ReactNode }> = ({ children 
 
 export const useHouseHelp = () => {
   const context = useContext(HouseHelpContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useHouseHelp must be used within a HouseHelpProvider');
   }
   return context;

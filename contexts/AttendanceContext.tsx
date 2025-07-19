@@ -1,8 +1,12 @@
-import { addAttendance as dbAddAttendance, updateAttendance as dbUpdateAttendance, getAttendances } from '@/utils/database';
+import {
+  addAttendance as dbAddAttendance,
+  updateAttendance as dbUpdateAttendance,
+  getAttendances
+} from '@/utils/database';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { HouseHelp } from './HouseHelpContext';
 
-interface Attendance {
+export interface Attendance {
   id: string;
   houseHelpId: string;
   date: string;
@@ -21,16 +25,20 @@ interface SalaryInfo {
 
 interface AttendanceContextType {
   attendances: Attendance[];
-  addAttendance: (attendance: Omit<Attendance, 'id'>) => void;
-  updateAttendance: (id: string, attendance: Partial<Attendance>) => void;
+  loading: boolean;
+  addAttendance: (attendance: Omit<Attendance, 'id'>) => Promise<void>;
+  updateAttendance: (id: string, updatedAttendance: Partial<Attendance>) => Promise<void>;
   getAttendanceForDate: (date: string) => Attendance[];
+  getAttendanceForHouseHelp: (houseHelpId: string, startDate: string, endDate: string) => Attendance[];
   calculateSalary: (houseHelp: HouseHelp, startDate: string, endDate: string) => SalaryInfo;
+  refreshAttendances: () => Promise<void>;
 }
 
 const AttendanceContext = createContext<AttendanceContextType | undefined>(undefined);
 
 export const AttendanceProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [attendances, setAttendances] = useState<Attendance[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadAttendances();
@@ -38,11 +46,16 @@ export const AttendanceProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const loadAttendances = async () => {
     try {
+      setLoading(true);
+      console.log('Loading attendances...');
       const loadedAttendances = await getAttendances();
+      console.log('Loaded attendances:', loadedAttendances);
       setAttendances(loadedAttendances);
     } catch (error) {
       console.error('Failed to load attendances:', error);
       setAttendances([]); // Set to empty array in case of error
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -53,6 +66,7 @@ export const AttendanceProvider: React.FC<{ children: ReactNode }> = ({ children
       setAttendances((prevAttendances) => [...prevAttendances, newAttendance]);
     } catch (error) {
       console.error('Failed to add attendance:', error);
+      throw error;
     }
   };
 
@@ -66,11 +80,20 @@ export const AttendanceProvider: React.FC<{ children: ReactNode }> = ({ children
       );
     } catch (error) {
       console.error('Failed to update attendance:', error);
+      throw error;
     }
   };
 
   const getAttendanceForDate = (date: string) => {
     return attendances.filter((attendance) => attendance.date === date);
+  };
+
+  const getAttendanceForHouseHelp = (houseHelpId: string, startDate: string, endDate: string) => {
+    return attendances.filter((attendance) =>
+      attendance.houseHelpId === houseHelpId &&
+      attendance.date >= startDate &&
+      attendance.date <= endDate
+    );
   };
 
   const calculateSalary = (houseHelp: HouseHelp, startDate: string, endDate: string): SalaryInfo => {
@@ -115,8 +138,21 @@ export const AttendanceProvider: React.FC<{ children: ReactNode }> = ({ children
     };
   };
 
+  const refreshAttendances = async () => {
+    await loadAttendances();
+  };
+
   return (
-    <AttendanceContext.Provider value={{ attendances, addAttendance, updateAttendance, getAttendanceForDate, calculateSalary }}>
+    <AttendanceContext.Provider value={{
+      attendances,
+      loading,
+      addAttendance,
+      updateAttendance,
+      getAttendanceForDate,
+      getAttendanceForHouseHelp,
+      calculateSalary,
+      refreshAttendances,
+    }}>
       {children}
     </AttendanceContext.Provider>
   );
@@ -124,7 +160,7 @@ export const AttendanceProvider: React.FC<{ children: ReactNode }> = ({ children
 
 export const useAttendance = () => {
   const context = useContext(AttendanceContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAttendance must be used within an AttendanceProvider');
   }
   return context;

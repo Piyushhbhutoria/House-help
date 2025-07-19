@@ -5,10 +5,11 @@ import { ThemedView } from '@/components/ThemedView';
 import { useAttendance } from '@/contexts/AttendanceContext';
 import { useHouseHelp } from '@/contexts/HouseHelpContext';
 import { useTheme } from '@/hooks/useTheme';
-import { Ionicons } from '@expo/vector-icons';
+import { borderRadius, shadows, spacing, typography } from '@/utils/spacing';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
+import { Button, Divider, Icon } from 'react-native-elements';
 
 const CalendarScreen: React.FC = () => {
   const { houseHelps } = useHouseHelp();
@@ -104,143 +105,198 @@ const CalendarScreen: React.FC = () => {
     });
   };
 
+  const renderHeader = () => (
+    <ThemedView style={styles.header}>
+      <ThemedView style={styles.headerContent}>
+        <ThemedView style={styles.titleSection}>
+          <ThemedText style={[styles.title, { color: theme.colors.text }]}>
+            Calendar
+          </ThemedText>
+          <ThemedText style={[styles.subtitle, { color: theme.colors.text }]}>
+            View and manage attendance across dates
+          </ThemedText>
+        </ThemedView>
+        <Button
+          title={showAllHelps ? 'All' : 'Today'}
+          onPress={() => setShowAllHelps(!showAllHelps)}
+          icon={
+            <Icon
+              name={showAllHelps ? "people" : "people-outline"}
+              type="ionicon"
+              size={16}
+              color="#FFFFFF"
+              style={{ marginRight: spacing.sm }}
+            />
+          }
+          buttonStyle={[styles.filterButton, { backgroundColor: theme.colors.primary }]}
+          titleStyle={styles.filterButtonText}
+          containerStyle={styles.filterButtonContainer}
+        />
+      </ThemedView>
+    </ThemedView>
+  );
+
+  const renderCalendar = () => (
+    <ThemedView style={styles.calendarContainer}>
+      <Calendar
+        onDayPress={onDayPress}
+        markedDates={{
+          ...markedDates,
+          [selectedDate]: {
+            selected: true,
+            selectedColor: theme.colors.primary,
+            ...(markedDates as any)[selectedDate]
+          },
+        }}
+        theme={{
+          calendarBackground: theme.colors.background,
+          textSectionTitleColor: theme.colors.text,
+          selectedDayBackgroundColor: theme.colors.primary,
+          selectedDayTextColor: '#FFFFFF',
+          todayTextColor: theme.colors.accent,
+          dayTextColor: theme.colors.text,
+          textDisabledColor: theme.colors.text + '50',
+          dotColor: theme.colors.accent,
+          selectedDotColor: '#FFFFFF',
+          arrowColor: theme.colors.primary,
+          monthTextColor: theme.colors.text,
+          indicatorColor: theme.colors.primary,
+        }}
+        style={[styles.calendar, { borderWidth: 0 }]}
+      />
+    </ThemedView>
+  );
+
+  const renderDateInfo = () => (
+    <ThemedView style={styles.dateInfoCard}>
+      <ThemedView style={styles.dateHeader}>
+        <ThemedView style={styles.dateSection}>
+          <Icon
+            name="calendar-outline"
+            type="ionicon"
+            size={20}
+            color={theme.colors.primary}
+          />
+          <ThemedView style={styles.dateTextContainer}>
+            <ThemedText style={[styles.dateText, { color: theme.colors.text }]}>
+              {formatDate(selectedDate)}
+            </ThemedText>
+            <ThemedText style={[styles.dayName, { color: theme.colors.text }]}>
+              {getDayName(selectedDate)}
+            </ThemedText>
+          </ThemedView>
+        </ThemedView>
+
+        <ThemedView style={styles.legendContainer}>
+          <ThemedView style={styles.legendItem}>
+            <ThemedView style={[styles.legendDot, { backgroundColor: '#4CAF50' }]} />
+            <ThemedText style={[styles.legendText, { color: theme.colors.text }]}>Present</ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.legendItem}>
+            <ThemedView style={[styles.legendDot, { backgroundColor: '#FF9800' }]} />
+            <ThemedText style={[styles.legendText, { color: theme.colors.text }]}>Mixed</ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.legendItem}>
+            <ThemedView style={[styles.legendDot, { backgroundColor: '#F44336' }]} />
+            <ThemedText style={[styles.legendText, { color: theme.colors.text }]}>Absent</ThemedText>
+          </ThemedView>
+        </ThemedView>
+      </ThemedView>
+
+      <Divider style={{ marginVertical: spacing.md }} />
+
+      <ThemedView style={styles.summaryContainer}>
+        <ThemedView style={styles.summaryItem}>
+          <ThemedText style={[styles.summaryNumber, { color: '#4CAF50' }]}>
+            {attendanceSummary.present}
+          </ThemedText>
+          <ThemedText style={[styles.summaryLabel, { color: theme.colors.text }]}>Present</ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.summaryItem}>
+          <ThemedText style={[styles.summaryNumber, { color: '#FF9800' }]}>
+            {attendanceSummary.halfDay}
+          </ThemedText>
+          <ThemedText style={[styles.summaryLabel, { color: theme.colors.text }]}>Half</ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.summaryItem}>
+          <ThemedText style={[styles.summaryNumber, { color: '#F44336' }]}>
+            {attendanceSummary.absent}
+          </ThemedText>
+          <ThemedText style={[styles.summaryLabel, { color: theme.colors.text }]}>Absent</ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.summaryItem}>
+          <ThemedText style={[styles.summaryNumber, { color: theme.colors.text }]}>
+            {attendanceSummary.notMarked}
+          </ThemedText>
+          <ThemedText style={[styles.summaryLabel, { color: theme.colors.text }]}>Pending</ThemedText>
+        </ThemedView>
+      </ThemedView>
+    </ThemedView>
+  );
+
+  const renderFilterInfo = () => {
+    if (workingOnDateHelps.length !== houseHelps.length && !showAllHelps) {
+      return (
+        <ThemedView style={styles.filterInfo}>
+          <Icon
+            name="information-circle-outline"
+            type="ionicon"
+            size={16}
+            color={theme.colors.text + '60'}
+          />
+          <ThemedText style={[styles.filterText, { color: theme.colors.text }]}>
+            {workingOnDateHelps.length} of {houseHelps.length} scheduled for {getDayName(selectedDate)}
+          </ThemedText>
+        </ThemedView>
+      );
+    }
+    return null;
+  };
+
+  const renderEmptyState = () => (
+    <ThemedView style={styles.emptyContainer}>
+      <Icon
+        name="calendar-outline"
+        type="ionicon"
+        size={64}
+        color={theme.colors.text + '40'}
+        style={styles.emptyIcon}
+      />
+      <ThemedText style={[styles.emptyTitle, { color: theme.colors.text }]}>
+        {houseHelps.length === 0 ? 'No House Help Added' : 'No Work Scheduled'}
+      </ThemedText>
+      <ThemedText style={[styles.emptyText, { color: theme.colors.text }]}>
+        {houseHelps.length === 0
+          ? 'Add house helpers first to view their attendance calendar.'
+          : showAllHelps
+            ? 'No house helpers found for the selected date.'
+            : `No house helpers are scheduled for ${getDayName(selectedDate)}.`}
+      </ThemedText>
+    </ThemedView>
+  );
+
   return (
     <SafeAreaWrapper>
       <ThemedView style={styles.container}>
         <ScrollView
           style={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
-          bounces={false}
+          contentContainerStyle={styles.scrollContent}
         >
-          {/* Header */}
-          <View style={styles.header}>
-            <ThemedText type="title" style={styles.title}>Calendar</ThemedText>
-            <TouchableOpacity
-              onPress={() => setShowAllHelps(!showAllHelps)}
-              style={[styles.headerButton, { backgroundColor: theme.colors.primary }]}
-            >
-              <Ionicons
-                name={showAllHelps ? "people" : "people-outline"}
-                size={16}
-                color={theme.colors.background}
-              />
-              <ThemedText style={[styles.headerButtonText, { color: theme.colors.background }]}>
-                {showAllHelps ? 'All' : 'Today'}
-              </ThemedText>
-            </TouchableOpacity>
-          </View>
+          {renderHeader()}
+          {renderCalendar()}
+          {renderDateInfo()}
+          {renderFilterInfo()}
 
-          {/* Compact Calendar */}
-          <View style={styles.calendarContainer}>
-            <Calendar
-              onDayPress={onDayPress}
-              markedDates={{
-                ...markedDates,
-                [selectedDate]: {
-                  selected: true,
-                  selectedColor: theme.colors.primary,
-                  ...(markedDates as any)[selectedDate]
-                },
-              }}
-              theme={{
-                calendarBackground: theme.colors.background,
-                textSectionTitleColor: theme.colors.text,
-                selectedDayBackgroundColor: theme.colors.primary,
-                selectedDayTextColor: theme.colors.background,
-                todayTextColor: theme.colors.accent,
-                dayTextColor: theme.colors.text,
-                textDisabledColor: theme.colors.text + '50',
-                dotColor: theme.colors.accent,
-                selectedDotColor: theme.colors.background,
-                arrowColor: theme.colors.primary,
-                monthTextColor: theme.colors.text,
-                indicatorColor: theme.colors.primary,
-              }}
-              style={[styles.calendar, {
-                borderWidth: 1,
-                borderColor: theme.colors.border || theme.colors.text + '20'
-              }]}
-            />
-          </View>
-
-          {/* Compact Date Info with Summary */}
-          <ThemedView style={[styles.compactInfo, { backgroundColor: theme.colors.card }]}>
-            <View style={styles.infoHeader}>
-              <ThemedText type="subtitle" style={styles.dateText}>
-                {formatDate(selectedDate)}
-              </ThemedText>
-
-              {/* Legend */}
-              <View style={styles.compactLegend}>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#4CAF50' }]} />
-                  <ThemedText style={styles.legendText}>Present</ThemedText>
-                </View>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#FF9800' }]} />
-                  <ThemedText style={styles.legendText}>Mixed</ThemedText>
-                </View>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: '#F44336' }]} />
-                  <ThemedText style={styles.legendText}>Absent</ThemedText>
-                </View>
-              </View>
-            </View>
-
-            {/* Summary Stats */}
-            <View style={styles.summaryRow}>
-              <View style={styles.summaryItem}>
-                <ThemedText style={[styles.summaryNumber, { color: '#4CAF50' }]}>
-                  {attendanceSummary.present}
-                </ThemedText>
-                <ThemedText style={styles.summaryLabel}>Present</ThemedText>
-              </View>
-              <View style={styles.summaryItem}>
-                <ThemedText style={[styles.summaryNumber, { color: '#FF9800' }]}>
-                  {attendanceSummary.halfDay}
-                </ThemedText>
-                <ThemedText style={styles.summaryLabel}>Half</ThemedText>
-              </View>
-              <View style={styles.summaryItem}>
-                <ThemedText style={[styles.summaryNumber, { color: '#F44336' }]}>
-                  {attendanceSummary.absent}
-                </ThemedText>
-                <ThemedText style={styles.summaryLabel}>Absent</ThemedText>
-              </View>
-              <View style={styles.summaryItem}>
-                <ThemedText style={[styles.summaryNumber, { color: theme.colors.text }]}>
-                  {attendanceSummary.notMarked}
-                </ThemedText>
-                <ThemedText style={styles.summaryLabel}>Pending</ThemedText>
-              </View>
-            </View>
-          </ThemedView>
-
-          {/* Filter Info */}
-          {workingOnDateHelps.length !== houseHelps.length && !showAllHelps && (
-            <ThemedText style={[styles.filterInfo, { color: theme.colors.text }]}>
-              {workingOnDateHelps.length} of {houseHelps.length} scheduled for {getDayName(selectedDate)}
-            </ThemedText>
-          )}
-
-          {/* House Helps List - Now part of ScrollView */}
-          <View style={styles.helpsList}>
+          <ThemedView style={styles.helpsList}>
             {workingOnDateHelps.length > 0 ? (
               workingOnDateHelps.map((item) => (
                 <AttendanceMarker key={item.id} houseHelp={item} date={selectedDate} />
               ))
             ) : (
-              <ThemedView style={styles.emptyContainer}>
-                <ThemedText style={styles.emptyText}>
-                  {houseHelps.length === 0
-                    ? 'No house helps added yet.'
-                    : showAllHelps
-                      ? 'No house helps found.'
-                      : `No house helps scheduled for ${getDayName(selectedDate)}.`}
-                </ThemedText>
-              </ThemedView>
+              renderEmptyState()
             )}
-          </View>
+          </ThemedView>
         </ScrollView>
       </ThemedView>
     </SafeAreaWrapper>
@@ -250,67 +306,101 @@ const CalendarScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
   },
   scrollContainer: {
     flex: 1,
   },
-  title: {
-    marginBottom: 16,
-    textAlign: 'center',
+  scrollContent: {
+    padding: spacing.xl,
   },
-  dateTitle: {
-    flex: 1,
-    textAlign: 'left',
+  header: {
+    marginBottom: spacing.xl,
   },
-  emptyContainer: {
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  emptyText: {
-    textAlign: 'center',
-  },
-  legend: {
+  headerContent: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 16,
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  titleSection: {
+    flex: 1,
+    marginRight: spacing.lg,
+  },
+  title: {
+    ...typography.title1,
+    marginBottom: spacing.sm,
+  },
+  subtitle: {
+    ...typography.subhead,
+    opacity: 0.7,
+    lineHeight: 20,
+  },
+  filterButtonContainer: {
+    alignSelf: 'flex-start',
+  },
+  filterButton: {
+    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    ...shadows.sm,
+  },
+  filterButtonText: {
+    color: '#FFFFFF',
+    ...typography.subhead,
+    fontWeight: '600',
+  },
+  calendarContainer: {
+    marginBottom: spacing.xl,
+    borderRadius: borderRadius.lg,
+    ...shadows.sm,
+  },
+  calendar: {
+    borderRadius: borderRadius.lg,
+  },
+  dateInfoCard: {
+    padding: spacing.lg,
+    borderRadius: borderRadius.lg,
+    marginBottom: spacing.lg,
+    ...shadows.sm,
+  },
+  dateHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  dateSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  dateTextContainer: {
+    marginLeft: spacing.md,
+  },
+  dateText: {
+    ...typography.headline,
+    fontWeight: '600',
+    marginBottom: spacing.xs,
+  },
+  dayName: {
+    ...typography.caption1,
+    opacity: 0.7,
+  },
+  legendContainer: {
+    alignItems: 'flex-end',
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: spacing.xs,
   },
   legendDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    marginRight: 4,
+    marginRight: spacing.xs,
   },
   legendText: {
-    fontSize: 11,
+    ...typography.caption2,
     opacity: 0.8,
-  },
-  dateInfo: {
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  dateHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 8,
-    borderRadius: 6,
-  },
-  filterText: {
-    fontSize: 12,
-    marginLeft: 4,
-    fontWeight: '600',
   },
   summaryContainer: {
     flexDirection: 'row',
@@ -320,67 +410,50 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   summaryNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    ...typography.title2,
+    fontWeight: '700',
+    marginBottom: spacing.xs,
   },
   summaryLabel: {
-    fontSize: 12,
-    opacity: 0.8,
-  },
-  filterInfo: {
-    marginBottom: 16,
-    textAlign: 'center',
-    fontSize: 12,
+    ...typography.caption1,
     opacity: 0.7,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  headerButton: {
+  filterInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 8,
-    borderRadius: 6,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.lg,
+    ...shadows.sm,
   },
-  headerButtonText: {
-    fontSize: 12,
-    marginLeft: 4,
-    fontWeight: '600',
-  },
-  calendarContainer: {
-    marginBottom: 16,
-  },
-  calendar: {
-    borderRadius: 8,
-  },
-  compactInfo: {
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  infoHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  dateText: {
+  filterText: {
+    ...typography.caption1,
+    marginLeft: spacing.sm,
     flex: 1,
-    textAlign: 'left',
-  },
-  compactLegend: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
   },
   helpsList: {
-    paddingBottom: 20,
+    paddingBottom: spacing.xl,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.xxxl,
+  },
+  emptyIcon: {
+    marginBottom: spacing.xl,
+  },
+  emptyTitle: {
+    ...typography.title2,
+    marginBottom: spacing.md,
+    textAlign: 'center',
+  },
+  emptyText: {
+    ...typography.body,
+    textAlign: 'center',
+    opacity: 0.7,
+    lineHeight: 22,
   },
 });
 

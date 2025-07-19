@@ -11,6 +11,16 @@ interface Attendance {
   shiftsCompleted: number;
 }
 
+// Define Payment interface locally to avoid circular imports
+interface Payment {
+  id: string;
+  houseHelpId: string;
+  amount: number;
+  type: 'advance' | 'holiday' | 'overtime' | 'adjustment' | 'salary';
+  date: string;
+  description: string;
+}
+
 let db: SQLite.SQLiteDatabase | MockDatabase | null = null;
 
 // Mock database implementation for web platform
@@ -88,6 +98,18 @@ export const initDatabase = async (): Promise<void> => {
           date TEXT NOT NULL,
           status TEXT NOT NULL,
           shiftsCompleted INTEGER NOT NULL,
+          FOREIGN KEY (houseHelpId) REFERENCES househelps (id)
+        );
+      `);
+
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS payments (
+          id TEXT PRIMARY KEY NOT NULL,
+          houseHelpId TEXT NOT NULL,
+          amount REAL NOT NULL,
+          type TEXT NOT NULL,
+          date TEXT NOT NULL,
+          description TEXT DEFAULT '',
           FOREIGN KEY (houseHelpId) REFERENCES househelps (id)
         );
       `);
@@ -237,6 +259,76 @@ export const updateAttendance = async (id: string, attendance: Partial<Attendanc
     ]);
   } catch (error) {
     console.error('Error updating attendance:', error);
+    throw error;
+  }
+};
+
+// Payment database operations
+export const getPayments = async (): Promise<Payment[]> => {
+  if (!db) await initDatabase();
+  try {
+    const result = await db!.execAsync(`SELECT * FROM payments ORDER BY date DESC`);
+    if (Array.isArray(result) && result.length > 0 && result[0].rows) {
+      return result[0].rows as Payment[];
+    } else {
+      console.warn('No payments found or unexpected result structure');
+      return [];
+    }
+  } catch (error) {
+    console.error('Error fetching payments:', error);
+    return [];
+  }
+};
+
+export const addPayment = async (payment: Payment): Promise<void> => {
+  if (!db) await initDatabase();
+  try {
+    const query = await db!.prepareAsync(
+      `INSERT INTO payments (id, houseHelpId, amount, type, date, description) VALUES (?, ?, ?, ?, ?, ?)`
+    );
+    await query.executeAsync([
+      payment.id,
+      payment.houseHelpId,
+      payment.amount,
+      payment.type,
+      payment.date,
+      payment.description || ''
+    ]);
+    console.log('Payment added successfully');
+  } catch (error) {
+    console.error('Error adding payment:', error);
+    throw error;
+  }
+};
+
+export const updatePayment = async (id: string, payment: Partial<Payment>): Promise<void> => {
+  if (!db) await initDatabase();
+  try {
+    const query = await db!.prepareAsync(
+      `UPDATE payments SET amount = ?, type = ?, date = ?, description = ? WHERE id = ?`
+    );
+    await query.executeAsync([
+      payment.amount || 0,
+      payment.type || 'adjustment',
+      payment.date || new Date().toISOString().split('T')[0],
+      payment.description || '',
+      id
+    ]);
+    console.log('Payment updated successfully');
+  } catch (error) {
+    console.error('Error updating payment:', error);
+    throw error;
+  }
+};
+
+export const deletePayment = async (id: string): Promise<void> => {
+  if (!db) await initDatabase();
+  try {
+    const query = await db!.prepareAsync(`DELETE FROM payments WHERE id = ?`);
+    await query.executeAsync([id]);
+    console.log('Payment deleted successfully');
+  } catch (error) {
+    console.error('Error deleting payment:', error);
     throw error;
   }
 };

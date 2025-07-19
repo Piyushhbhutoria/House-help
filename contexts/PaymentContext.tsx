@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import {
+  addPayment as dbAddPayment,
+  deletePayment as dbDeletePayment,
+  updatePayment as dbUpdatePayment,
+  getPayments
+} from '@/utils/database';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
-interface Payment {
+export interface Payment {
   id: string;
   houseHelpId: string;
   amount: number;
@@ -11,45 +17,94 @@ interface Payment {
 
 interface PaymentContextType {
   payments: Payment[];
-  addPayment: (payment: Omit<Payment, 'id'>) => void;
-  updatePayment: (id: string, payment: Partial<Payment>) => void;
-  deletePayment: (id: string) => void;
+  loading: boolean;
+  addPayment: (payment: Omit<Payment, 'id'>) => Promise<void>;
+  updatePayment: (id: string, payment: Partial<Payment>) => Promise<void>;
+  deletePayment: (id: string) => Promise<void>;
   getPaymentsForHouseHelp: (houseHelpId: string, startDate: string, endDate: string) => Payment[];
+  refreshPayments: () => Promise<void>;
 }
 
 const PaymentContext = createContext<PaymentContextType | undefined>(undefined);
 
 export const PaymentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const addPayment = (payment: Omit<Payment, 'id'>) => {
-    const newPayment = { ...payment, id: Date.now().toString() };
-    setPayments(prev => [...prev, newPayment]);
+  useEffect(() => {
+    loadPayments();
+  }, []);
+
+  const loadPayments = async () => {
+    try {
+      setLoading(true);
+      console.log('Loading payments...');
+      const loadedPayments = await getPayments();
+      console.log('Loaded payments:', loadedPayments);
+      setPayments(loadedPayments);
+    } catch (error) {
+      console.error('Failed to load payments:', error);
+      setPayments([]); // Set to empty array in case of error
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const updatePayment = (id: string, payment: Partial<Payment>) => {
-    setPayments(prev => prev.map(p => p.id === id ? { ...p, ...payment } : p));
+  const addPayment = async (payment: Omit<Payment, 'id'>) => {
+    const newPayment: Payment = {
+      ...payment,
+      id: Date.now().toString()
+    };
+    try {
+      await dbAddPayment(newPayment);
+      setPayments(prev => [...prev, newPayment]);
+    } catch (error) {
+      console.error('Failed to add payment:', error);
+      throw error;
+    }
   };
 
-  const deletePayment = (id: string) => {
-    setPayments(prev => prev.filter(p => p.id !== id));
+  const updatePayment = async (id: string, payment: Partial<Payment>) => {
+    try {
+      await dbUpdatePayment(id, payment);
+      setPayments(prev => prev.map(p => p.id === id ? { ...p, ...payment } : p));
+    } catch (error) {
+      console.error('Failed to update payment:', error);
+      throw error;
+    }
+  };
+
+  const deletePayment = async (id: string) => {
+    try {
+      await dbDeletePayment(id);
+      setPayments(prev => prev.filter(p => p.id !== id));
+    } catch (error) {
+      console.error('Failed to delete payment:', error);
+      throw error;
+    }
   };
 
   const getPaymentsForHouseHelp = (houseHelpId: string, startDate: string, endDate: string) => {
-    return payments.filter(p => 
-      p.houseHelpId === houseHelpId && 
-      p.date >= startDate && 
+    return payments.filter(p =>
+      p.houseHelpId === houseHelpId &&
+      p.date >= startDate &&
       p.date <= endDate
     );
+  };
+
+  const refreshPayments = async () => {
+    await loadPayments();
   };
 
   return (
     <PaymentContext.Provider value={{
       payments,
+      loading,
       addPayment,
       updatePayment,
       deletePayment,
       getPaymentsForHouseHelp,
+      refreshPayments,
     }}>
       {children}
     </PaymentContext.Provider>
