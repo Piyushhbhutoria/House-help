@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "house-help",
+    "name": "House Help",
     "slug": "house-help",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -25,7 +25,16 @@
       "runtimeVersion": {
         "policy": "appVersion"
       },
-      "package": "xyz.loopbacklabs.househelp"
+      "package": "xyz.loopbacklabs.househelp",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -49,6 +58,6 @@
     "updates": {
       "url": "https://u.expo.dev/2d2d2595-c8bd-438f-8bbf-1889c5555e1b"
     },
-    "owner": "piyushhb"
+    "owner": "loopback-labs"
   }
 }
