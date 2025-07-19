@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.piyushhb.house-help",
+      "bundleIdentifier": "com.loopback-labs.house-help",
       "runtimeVersion": "1.0.0"
     },
     "android": {
@@ -23,15 +23,12 @@
         "backgroundColor": "#ffffff"
       },
       "runtimeVersion": "1.0.0",
-      "package": "xyz.loopbacklabs.househelp",
+      "package": "xyz.loopback-labs.house-help",
       "versionCode": 1,
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE"
-      ],
-      "blockedPermissions": [
-        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
